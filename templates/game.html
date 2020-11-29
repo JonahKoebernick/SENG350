@@ -10430,34 +10430,40 @@ function getQueryParams(qs) {
 
 function updateboard(gameState){
     let board = "board";
+    let snakes = gameState['snakes'];
     for(i = 0; i<=99; i++){
-
-        if((gameState['boardState'][i]) == -1 ){
-            document.getElementById(board.concat(i.toString(10))).className = '';
-            document.getElementById(board.concat(i.toString(10))).className = 'blank-space';
-        }
-        if((gameState['boardState'][i]) == 0 ){
-            document.getElementById(board.concat(i.toString(10))).className = '';
-            document.getElementById(board.concat(i.toString(10))).className = 'food-space';
-        }
-        if((gameState['boardState'][i]) == 1 ){
-            document.getElementById(board.concat(i.toString(10))).className = '';
-            document.getElementById(board.concat(i.toString(10))).className = 'snake-body';
-        }
-        if((gameState['boardState'][i]) == 2 ){
-            document.getElementById(board.concat(i.toString(10))).className = '';
-            document.getElementById(board.concat(i.toString(10))).className = 'snake-body2';
-        }
-
+        document.getElementById(board.concat(i.toString(10))).style.backgroundColor = '#a2a2a2';
     }
-
+    let x = 0;
+    let y = 0;
+    let colour = '#9d32a8';
+    for(i = 0; i<2; i++){
+        colour = snakes[i]['snakeColour'];
+        console.log(snakes[i]['snakeID']);
+        for(j=0; j < (snakes[i]['snakePosition']).length;j++){
+            x = snakes[i]['snakePosition'][j]['x'];
+            y = snakes[i]['snakePosition'][j]['y'];
+            let string1 = '';
+            if(y > 1) {
+                string1 = board.concat(y.toString(10));
+            }else{
+                string1 = board;
+            }
+            let finalstring = string1.concat(x.toString(10));
+            document.getElementById(finalstring).style.backgroundColor = colour;
+        }
+    }
 }
 var gameID  = '';
 var snakeID = '';
 var host    = 1;
-var socket = io.connect('https://' + document.domain + ':' + location.port);
+var socket = io.connect('http://' + document.domain + ':' + location.port);
 
 socket.on( 'connect', function(data) {
+    let board = "board";
+    for(i = 0; i<=99; i++){
+        document.getElementById(board.concat(i.toString(10))).style.backgroundColor = '#a2a2a2';
+    }
 
  });
 
@@ -10475,6 +10481,7 @@ socket.on( 'gameInfo', function(data) {
  });
 
 socket.on( 'boardState', function(data) {
+    console.dir(data);
     updateboard(data);
  });
 
@@ -10619,106 +10626,106 @@ window.onload = onStart;
 
 
     <div class="grid-container">
-        <div id="board0"   class="blank-space"></div>
-        <div id="board1"   class="blank-space"></div>
-        <div id="board2"   class="blank-space"></div>
-        <div id="board3"   class="blank-space"></div>
-        <div id="board4"   class="blank-space"></div>
-        <div id="board5"   class="blank-space"></div>
-        <div id="board6"   class="blank-space"></div>
-        <div id="board7"   class="blank-space"></div>
-        <div id="board8"   class="blank-space"></div>
-        <div id="board9"   class="blank-space"></div>
-        <div id="board10"  class="blank-space"></div>
-        <div id="board11"  class="blank-space"></div>
-        <div id="board12"  class="blank-space"></div>
-        <div id="board13"  class="blank-space"></div>
-        <div id="board14"  class="blank-space"></div>
-        <div id="board15"  class="blank-space"></div>
-        <div id="board16"  class="blank-space"></div>
-        <div id="board17"  class="blank-space"></div>
-        <div id="board18"  class="blank-space"></div>
-        <div id="board19"  class="blank-space"></div>
-        <div id="board20"  class="blank-space"></div>
-        <div id="board21"  class="blank-space"></div>
-        <div id="board22"  class="blank-space"></div>
-        <div id="board23"  class="blank-space"></div>
-        <div id="board24"  class="blank-space"></div>
-        <div id="board25"  class="blank-space"></div>
-        <div id="board26"  class="blank-space"></div>
-        <div id="board27"  class="blank-space"></div>
-        <div id="board28"  class="blank-space"></div>
-        <div id="board29"  class="blank-space"></div>
-        <div id="board30"  class="blank-space"></div>
-        <div id="board31"  class="blank-space"></div>
-        <div id="board32"  class="blank-space"></div>
-        <div id="board33"  class="blank-space"></div>
-        <div id="board34"  class="blank-space"></div>
-        <div id="board35"  class="blank-space"></div>
-        <div id="board36"  class="blank-space"></div>
-        <div id="board37"  class="blank-space"></div>
-        <div id="board38"  class="blank-space"></div>
-        <div id="board39"  class="blank-space"></div>
-        <div id="board40"  class="blank-space"></div>
-        <div id="board41"  class="blank-space"></div>
-        <div id="board42"  class="blank-space"></div>
-        <div id="board43"  class="blank-space"></div>
-        <div id="board44"  class="blank-space"></div>
-        <div id="board45"  class="blank-space"></div>
-        <div id="board46"  class="blank-space"></div>
-        <div id="board47"  class="blank-space"></div>
-        <div id="board48"  class="blank-space"></div>
-        <div id="board49"  class="blank-space"></div>
-        <div id="board50"  class="blank-space"></div>
-        <div id="board51"  class="blank-space"></div>
-        <div id="board52"  class="blank-space"></div>
-        <div id="board53"  class="blank-space"></div>
-        <div id="board54"  class="blank-space"></div>
-        <div id="board55"  class="blank-space"></div>
-        <div id="board56"  class="blank-space"></div>
-        <div id="board57"  class="blank-space"></div>
-        <div id="board58"  class="blank-space"></div>
-        <div id="board59"  class="blank-space"></div>
-        <div id="board60"  class="blank-space"></div>
-        <div id="board61"  class="blank-space"></div>
-        <div id="board62"  class="blank-space"></div>
-        <div id="board63"  class="blank-space"></div>
-        <div id="board64"  class="blank-space"></div>
-        <div id="board65"  class="blank-space"></div>
-        <div id="board66"  class="blank-space"></div>
-        <div id="board67"  class="blank-space"></div>
-        <div id="board68"  class="blank-space"></div>
-        <div id="board69"  class="blank-space"></div>
-        <div id="board70"  class="blank-space"></div>
-        <div id="board71"  class="blank-space"></div>
-        <div id="board72"  class="blank-space"></div>
-        <div id="board73"  class="blank-space"></div>
-        <div id="board74"  class="blank-space"></div>
-        <div id="board75"  class="blank-space"></div>
-        <div id="board76"  class="blank-space"></div>
-        <div id="board77"  class="blank-space"></div>
-        <div id="board78"  class="blank-space"></div>
-        <div id="board79"  class="blank-space"></div>
-        <div id="board80"  class="blank-space"></div>
-        <div id="board81"  class="blank-space"></div>
-        <div id="board82"  class="blank-space"></div>
-        <div id="board83"  class="blank-space"></div>
-        <div id="board84"  class="blank-space"></div>
-        <div id="board85"  class="blank-space"></div>
-        <div id="board86"  class="blank-space"></div>
-        <div id="board87"  class="blank-space"></div>
-        <div id="board88"  class="blank-space"></div>
-        <div id="board89"  class="blank-space"></div>
-        <div id="board90"  class="blank-space"></div>
-        <div id="board91"  class="blank-space"></div>
-        <div id="board92"  class="blank-space"></div>
-        <div id="board93"  class="blank-space"></div>
-        <div id="board94"  class="blank-space"></div>
-        <div id="board95"  class="blank-space"></div>
-        <div id="board96"  class="blank-space"></div>
-        <div id="board97"  class="blank-space"></div>
-        <div id="board98"  class="blank-space"></div>
-        <div id="board99"  class="blank-space"></div>
+        <div id="board0"   ></div>
+        <div id="board1"   ></div>
+        <div id="board2"   ></div>
+        <div id="board3"   ></div>
+        <div id="board4"   ></div>
+        <div id="board5"   ></div>
+        <div id="board6"   ></div>
+        <div id="board7"   ></div>
+        <div id="board8"   ></div>
+        <div id="board9"   ></div>
+        <div id="board10"  ></div>
+        <div id="board11"  ></div>
+        <div id="board12"  ></div>
+        <div id="board13"  ></div>
+        <div id="board14"  ></div>
+        <div id="board15"  ></div>
+        <div id="board16"  ></div>
+        <div id="board17"  ></div>
+        <div id="board18"  ></div>
+        <div id="board19"  ></div>
+        <div id="board20"  ></div>
+        <div id="board21"  ></div>
+        <div id="board22"  ></div>
+        <div id="board23"  ></div>
+        <div id="board24"  ></div>
+        <div id="board25"  ></div>
+        <div id="board26"  ></div>
+        <div id="board27"  ></div>
+        <div id="board28"  ></div>
+        <div id="board29"  ></div>
+        <div id="board30"  ></div>
+        <div id="board31"  ></div>
+        <div id="board32"  ></div>
+        <div id="board33"  ></div>
+        <div id="board34"  ></div>
+        <div id="board35"  ></div>
+        <div id="board36"  ></div>
+        <div id="board37"  ></div>
+        <div id="board38"  ></div>
+        <div id="board39"  ></div>
+        <div id="board40"  ></div>
+        <div id="board41"  ></div>
+        <div id="board42"  ></div>
+        <div id="board43"  ></div>
+        <div id="board44"  ></div>
+        <div id="board45"  ></div>
+        <div id="board46"  ></div>
+        <div id="board47"  ></div>
+        <div id="board48"  ></div>
+        <div id="board49"  ></div>
+        <div id="board50"  ></div>
+        <div id="board51"  ></div>
+        <div id="board52"  ></div>
+        <div id="board53"  ></div>
+        <div id="board54"  ></div>
+        <div id="board55"  ></div>
+        <div id="board56"  ></div>
+        <div id="board57"  ></div>
+        <div id="board58"  ></div>
+        <div id="board59"  ></div>
+        <div id="board60"  ></div>
+        <div id="board61"  ></div>
+        <div id="board62"  ></div>
+        <div id="board63"  ></div>
+        <div id="board64"  ></div>
+        <div id="board65"  ></div>
+        <div id="board66"  ></div>
+        <div id="board67"  ></div>
+        <div id="board68"  ></div>
+        <div id="board69"  ></div>
+        <div id="board70"  ></div>
+        <div id="board71"  ></div>
+        <div id="board72"  ></div>
+        <div id="board73"  ></div>
+        <div id="board74"  ></div>
+        <div id="board75"  ></div>
+        <div id="board76"  ></div>
+        <div id="board77"  ></div>
+        <div id="board78"  ></div>
+        <div id="board79"  ></div>
+        <div id="board80"  ></div>
+        <div id="board81"  ></div>
+        <div id="board82"  ></div>
+        <div id="board83"  ></div>
+        <div id="board84"  ></div>
+        <div id="board85"  ></div>
+        <div id="board86"  ></div>
+        <div id="board87"  ></div>
+        <div id="board88"  ></div>
+        <div id="board89"  ></div>
+        <div id="board90"  ></div>
+        <div id="board91"  ></div>
+        <div id="board92"  ></div>
+        <div id="board93"  ></div>
+        <div id="board94"  ></div>
+        <div id="board95"  ></div>
+        <div id="board96"  ></div>
+        <div id="board97"  ></div>
+        <div id="board98"  ></div>
+        <div id="board99"  ></div>
     </div>
 </div>
 </div>

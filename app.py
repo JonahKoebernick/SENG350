@@ -3,52 +3,35 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 from random import randrange
 from apscheduler.schedulers.background import BackgroundScheduler
 import game_logic
+import constants
 import time
+import sys
 
+# Boiler plate
 app = Flask(__name__)
 socketio = SocketIO(app)
 
+# Dictonary that contains all the games currently in progress
 currgames = {}
 
 
 def sensor():
-
-    for game in currgames:
-
-        if(currgames[game].getRunning() == True):
-            if(currgames[game].checkWalls()):
-                socketio.emit('gameOver', room=game)
-                currgames.pop(game)
-                print("gameOver1")
-            snake1 = currgames[game].getHostSnake()
-            snake1pos = snake1.getPos()
-
-            snake2 = currgames[game].getP2Snake()
-            snake2pos = snake2.getPos()
-            if(snake1pos.count(snake1pos[0]) > 1):
-                socketio.emit('gameOver', room=game)
-                currgames.pop(game)
-                print("gameOver")
-
-            boardstate = [-1] * 100
-            for cords in snake1pos:
-                boardstate[cords] = 1
-            for cords in snake2pos:
-                boardstate[cords] = 2
-            if not currgames[game].getFood():
-                foodPosition = randrange(101)
-                while boardstate[foodPosition] != -1:
-                    foodPosition = randrange(101)
-                currgames[game].setFood([foodPosition])
-            for food in currgames[game].getFood():
-                boardstate[food] = 0
-
+    for gameID in currgames:
+        game = currgames[gameID]
+        if(game.getRunning() == True):
+            game.checkWalls()
             return_dict = {}
-            return_dict['boardState'] = boardstate
-            socketio.emit('boardState',return_dict, room=game)
+            snakeList = []
+            snakes = game.getSnakes()
+            for snakeID in snakes:
+                snake = snakes[snakeID]
+                colour = '#'+snake.getcolour()
+                snakePosition = snake.getPos()
+                snakeList.append({'snakeID': snakeID, 'snakePosition':snakePosition, 'snakeColour': colour})
+            return_dict['snakes'] = snakeList
+            socketio.emit('boardState',return_dict, room=gameID)
 
-
-
+# The Scheduler that times the games, alerting this value sets the moves per Second
 sched = BackgroundScheduler(daemon=True)
 sched.add_job(sensor,'interval',seconds=2)
 sched.start()
@@ -57,12 +40,14 @@ sched.start()
 @socketio.on('hostGame')
 def hostGame():
     # Initialize a new game and add it do the dictionary
-    game       = game_logic.game()
-    gameID     = game.getID()
-    snakeID = game.getSnake1ID()
+    game      = game_logic.game()
+    gameID    = game.getID()
+    snakeID   = game.getStartSnakeID(0)
     currgames[gameID] = game
 
-    # Bind the User to the Specific GameID
+    # Bind the User to the Specific
+    # This is part of the subscribes publisher pattern.
+    # The client subscribes to a gameID, and when that game is updated they are notified.
     join_room(gameID)
 
     # Send GameID and the SnakeID of the user
@@ -75,36 +60,45 @@ def hostGame():
 
 @socketio.on('move')
 def move(data):
-    gameID = data['gameID']
-    move   = data['move']
+    # Extract all the data
+    gameID  = data['gameID']
+    move    = data['move']
     snakeID = data['snakeID']
-    snake1ID = currgames[gameID].getSnake1ID()
-    snake2ID = currgames[gameID].getSnakeP2ID()
-    if(snake1ID == snakeID):
-        snake1 = currgames[gameID].getHostSnake()
-        snake1.setMove(move)
-    if(snake2ID == snakeID):
-        snake2 = currgames[gameID].getP2Snake()
-        snake2.setMove(move)
+
+    # Get the dictonary of snakes and set the move
+    snakes = currgames[gameID].getSnakes()
+    snakes[snakeID].setMove(move)
 
 
 @socketio.on('startGame')
 def startGame(data):
+    # Extract data
     gameID = data['gameID']
+
+    # Start the game
     currgames[gameID].setRunning(True)
 
 @socketio.on('joinGame')
 def joinGame(data):
-    gameID  = data['gameID']
-    snakeID = currgames[gameID].getSnakeP2ID()
-    currgames[gameID].setReady(True)
+    # Extract Data
+    gameID    = data['gameID']
+    game      = currgames[gameID]
+
+    # Add player to game instance
+    playerNum = game.getPlayersJoined()
+    snakeID   = game.getStartSnakeID(playerNum)
+    currgames[gameID].addPlayer()
     join_room(gameID)
+
     # Send GameID and the SnakeID of the user
     return_dict = {}
     return_dict['gameID'] =  gameID
     return_dict['snakeID'] = snakeID
     socketio.emit('gameInfo', return_dict)
-    socketio.emit('gameReady',room=gameID)
+
+    # If the room is full, alert the host they can start
+    if (playerNum + 1) == constants.PLAYERS:
+        socketio.emit('gameReady',room=gameID)
 
 @app.route('/')
 def hello():
@@ -116,7 +110,6 @@ def game():
 
 @app.route('/stylesheet')
 def stylesheet():
-    print('HERE')
     return send_from_directory('/static/CSS/', 'main.css')
 
 @app.route('/javascript')
