@@ -20,6 +20,8 @@ def sensor():
         game = currgames[gameID]
         if(game.getRunning() == True):
             game.checkWalls()
+            game.checkFood()
+            food = game.getFood()
             return_dict = {}
             snakeList = []
             snakes = game.getSnakes()
@@ -29,6 +31,7 @@ def sensor():
                 snakePosition = snake.getPos()
                 snakeList.append({'snakeID': snakeID, 'snakePosition':snakePosition, 'snakeColour': colour})
             return_dict['snakes'] = snakeList
+            return_dict['food'] = food
             socketio.emit('boardState',return_dict, room=gameID)
 
 # The Scheduler that times the games, alerting this value sets the moves per Second

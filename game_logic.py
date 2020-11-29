@@ -79,10 +79,29 @@ def checkWalls(game):
                 x = snakeHead['x']
                 snakePosition.insert(0, {'x':x,'y':y})
 
-        del snakePosition[-1]
         snake.setPos(snakePosition)
-
     return snakeOutofBounds
+
+def checkFood(game):
+    snakes = game.getSnakes()
+    food   = game.getFood()
+
+    for snakeID in snakes:
+        snake         = snakes[snakeID]
+        snakePosition = snake.getPos()
+        snakeHead = snakePosition[0]
+
+
+        # If it is on a food block, it grows by one. So the tail isn't deleted.
+        # And we need to generate a new food block
+        if (snakeHead['x'] == food['x']) and (snakeHead['y'] == food['y']):
+            game.generateFood()
+
+        # If it isn't on food, delete it's tail
+        else:
+            del snakePosition[-1]
+            snake.setPos(snakePosition)
+
 
 # TODO: Checks if there was a collision, if it was head on head who won.
 def checkCollisions(game):
@@ -96,7 +115,6 @@ class snake:
         self.isAlive    = True
         self.colour     = '#9d32a8'
         self.randomColour()
-
 
     def getID(self):
         return self.snakeID
@@ -125,6 +143,32 @@ class snake:
     def randomColour(self):
         self.colour = "%06x" % random.randint(0, 0xFFFFFF)
 
+# TODO: impplement a board class that takes care of food generation
+class board():
+    def __int__(self):
+        self.food = {'x':0,'y':0}
+
+    def getFood(self):
+        return self.food
+
+    def generateFood(self,snakes):
+        x = randrange(10)
+        y = randrange(10)
+        xlist = []
+        ylist = []
+        for snakeID in snakes:
+            snake = snakes[snakeID]
+            snakePosition = snake.getPos()
+            for pos in snakePosition:
+                xlist.append(pos['x'])
+                ylist.append(pos['y'])
+        while x in xlist:
+            x = randrange(10)
+
+        while y in ylist:
+            y = randrange(10)
+        self.food = {'x':x,'y':y}
+
 class game():
     def __init__(self):
         self.gameID    = creatGameID()
@@ -133,6 +177,8 @@ class game():
         self.initSnakes()
         self.playersJoined = 1
         self.running = False
+        self.board = board()
+        self.generateFood()
 
     def initSnakes(self):
         for x in range(constants.PLAYERS):
@@ -165,12 +211,12 @@ class game():
     def checkWalls(self):
         return checkWalls(self)
 
-# TODO: impplement a board class that takes care of food generation
-class board():
-    def __int__(self):
-        self.state = 0
-    def getBoard(self):
-        print(self.state)
+    def checkFood(self):
+        checkFood(self)
+
+    def getFood(self):
+        return self.board.getFood()
 
     def generateFood(self):
-        return 0
+        self.board.generateFood(self.snakes)
+

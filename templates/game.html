@@ -10432,8 +10432,22 @@ function updateboard(gameState){
     let board = "board";
     let snakes = gameState['snakes'];
     for(i = 0; i<=99; i++){
+        document.getElementById(board.concat(i.toString(10))).className = '';
         document.getElementById(board.concat(i.toString(10))).style.backgroundColor = '#a2a2a2';
     }
+    let food = gameState['food'];
+    let foodx = food['x'];
+    let foody = food['y'];
+    let string1 = '';
+    if(foody > 1) {
+       string1 = board.concat(foody.toString(10));
+    }else{
+        string1 = board;
+    }
+    let finalstring = string1.concat(foodx.toString(10));
+    document.getElementById(finalstring).className = 'food-space';
+    document.getElementById(finalstring).style.backgroundColor = '#d43d3d';
+
     let x = 0;
     let y = 0;
     let colour = '#9d32a8';
