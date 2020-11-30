@@ -10505,6 +10505,8 @@ socket.on( 'gameOver', function(data) {
 
     if(winner == snakeID){
         document.getElementById("winOrLost").innerHTML = "Congratulations! You Won!";
+    }else if(winner == 'tie'){
+        document.getElementById("winOrLost").innerHTML = "Ummmm, Tie.";
     }else{
         document.getElementById("winOrLost").innerHTML = "Sorry... You lost.";
     }

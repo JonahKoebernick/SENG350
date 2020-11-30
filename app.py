@@ -31,7 +31,11 @@ def sensor():
                 if(len(curr_dead) >= (constants.PLAYERS-1)):
                     allsnakes = game.getAllSnakes()
                     winner = list(set(allsnakes)- set(curr_dead))
-                    winnerstring = winner[0]
+                    winnerstring = ''
+                    if(len(winner) > 0):
+                        winnerstring = winner[0]
+                    else:
+                        winnerstring = 'tie'
                     return_winner = {'winner': winnerstring}
                     socketio.emit('gameOver',return_winner, room=gameID)
                     currgames.pop(gameID)
