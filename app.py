@@ -19,9 +19,25 @@ def sensor():
     for gameID in currgames:
         game = currgames[gameID]
         if(game.getRunning() == True):
-            game.checkWalls()
+            deadSnakes = []
+            deadSnakes.extend(game.checkWalls())
             game.checkFood()
-            food = game.getFood()
+            deadSnakes.extend(game.checkHeadOnCollisions())
+            deadSnakes.extend(game.checkCollisions())
+            print(deadSnakes, file=sys.stderr)
+            if len(deadSnakes) > 0:
+                game.addDeadSnake(deadSnakes)
+                curr_dead = game.getDeadSnakes()
+                if(len(curr_dead) >= (constants.PLAYERS-1)):
+                    allsnakes = game.getAllSnakes()
+                    winner = list(set(allsnakes)- set(curr_dead))
+                    winnerstring = winner[0]
+                    return_winner = {'winner': winnerstring}
+                    socketio.emit('gameOver',return_winner, room=gameID)
+                    currgames.pop(gameID)
+                    print("gameOver1",file=sys.stderr)
+
+
             return_dict = {}
             snakeList = []
             snakes = game.getSnakes()
@@ -30,6 +46,7 @@ def sensor():
                 colour = '#'+snake.getcolour()
                 snakePosition = snake.getPos()
                 snakeList.append({'snakeID': snakeID, 'snakePosition':snakePosition, 'snakeColour': colour})
+            food = game.getFood()
             return_dict['snakes'] = snakeList
             return_dict['food'] = food
             socketio.emit('boardState',return_dict, room=gameID)

@@ -10471,6 +10471,7 @@ function updateboard(gameState){
 var gameID  = '';
 var snakeID = '';
 var host    = 1;
+var winner  = '';
 var socket = io.connect('http://' + document.domain + ':' + location.port);
 
 socket.on( 'connect', function(data) {
@@ -10499,7 +10500,15 @@ socket.on( 'boardState', function(data) {
     updateboard(data);
  });
 
-socket.on( 'gameOver', function() {
+socket.on( 'gameOver', function(data) {
+    winner = data['winner'];
+
+    if(winner == snakeID){
+        document.getElementById("winOrLost").innerHTML = "Congratulations! You Won!";
+    }else{
+        document.getElementById("winOrLost").innerHTML = "Sorry... You lost.";
+    }
+
     socket.disconnect();
     $('#GameOver').modal()
  });
@@ -10624,7 +10633,7 @@ window.onload = onStart;
       </div>
       <div class="modal-body ">
           <div class="row justify-content-center">
-        <p >Green is the Champion</p>
+        <p id="winOrLost" >Green is the Champion</p>
               </div>
           <div class="row justify-content-center">
         <a  class="btn btn-secondary p-3 m-3"  href="/">Back</a>

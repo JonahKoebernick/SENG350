@@ -47,41 +47,42 @@ def checkWalls(game):
         if(move == 'R'):
             if(snakeHead['x'] + 1) > 9:
                 snakeOutofBounds.append(snakeID)
-            else:
-                y = snakeHead['y']
-                x = snakeHead['x'] + 1
-                snakePosition.insert(0, {'x':x,'y':y})
+            y = snakeHead['y']
+            x = snakeHead['x'] + 1
+            snakePosition.insert(0, {'x':x,'y':y})
 
 
         if(move == 'L'):
             if(snakeHead['x'] - 1) < 0:
                 snakeOutofBounds.append(snakeID)
-            else:
-                y = snakeHead['y']
-                x = snakeHead['x'] - 1
-                snakePosition.insert(0, {'x':x,'y':y})
+            y = snakeHead['y']
+            x = snakeHead['x'] - 1
+            snakePosition.insert(0, {'x':x,'y':y})
 
 
         if(move == 'D'):
             if(snakeHead['y'] + 1) > 9:
                 snakeOutofBounds.append(snakeID)
-            else:
-                y = snakeHead['y'] + 1
-                x = snakeHead['x']
-                snakePosition.insert(0, {'x':x,'y':y})
+            y = snakeHead['y'] + 1
+            x = snakeHead['x']
+            snakePosition.insert(0, {'x':x,'y':y})
 
 
         if(move == 'U'):
             if(snakeHead['y'] - 1) < 0:
                 snakeOutofBounds.append(snakeID)
-            else:
-                y = snakeHead['y'] - 1
-                x = snakeHead['x']
-                snakePosition.insert(0, {'x':x,'y':y})
+            y = snakeHead['y'] - 1
+            x = snakeHead['x']
+            snakePosition.insert(0, {'x':x,'y':y})
 
         snake.setPos(snakePosition)
     return snakeOutofBounds
 
+# checkFood()
+# Params
+# - game game which is a game class instance
+# This function checks to see if a snakes is on food.
+# It contains the growing mechanics for the snakes
 def checkFood(game):
     snakes = game.getSnakes()
     food   = game.getFood()
@@ -102,10 +103,62 @@ def checkFood(game):
             del snakePosition[-1]
             snake.setPos(snakePosition)
 
+# checkHeadOnCollision()
+# Params
+# - game game which is a game class instance
+# This function checks to see if there was a head on head collisions
+# returns a list of deadsnakes
+def checkHeadOnCollision(game):
+    snakes = game.getSnakes()
+    deadSnakes = []
 
-# TODO: Checks if there was a collision, if it was head on head who won.
-def checkCollisions(game):
-    return 0
+    for snakeID in snakes:
+        snake         = snakes[snakeID]
+        snakePosition = snake.getPos()
+        snakeHead = snakePosition[0]
+        length    = len(snakePosition)
+
+        for snakeIDtoCheck in snakes:
+            snaketoCheck = snakes[snakeIDtoCheck]
+            snakePositiontoCheck = snaketoCheck.getPos()
+            snakeHeadtoCheck = snakePositiontoCheck[0]
+            lengthtoCheck = len(snakePositiontoCheck)
+
+            if(snakeID != snakeIDtoCheck):
+                if snakeHead == snakeHeadtoCheck:
+                    if(length > lengthtoCheck):
+                        deadSnakes.append(snakeIDtoCheck)
+                    if(length == lengthtoCheck):
+                        deadSnakes.append(snakeIDtoCheck)
+                        deadSnakes.append(snakeID)
+                    if(length < lengthtoCheck):
+                        deadSnakes.append(snakeID)
+
+    return list(set(deadSnakes))
+
+# checkCollision()
+# Params
+# - game game which is a game class instance
+# This function checks to see if there was a head on body collision
+# returns a list of deadsnakes
+def checkCollision(game):
+    snakes = game.getSnakes()
+    deadSnakes = []
+
+    for snakeID in snakes:
+        snake         = snakes[snakeID]
+        snakePosition = snake.getPos()
+        snakeHead = snakePosition[0]
+
+        for snakeIDtoCheck in snakes:
+            snaketoCheck = snakes[snakeIDtoCheck]
+            snakePositiontoCheck = snaketoCheck.getPos()
+
+            for j in range(1,len(snakePositiontoCheck)):
+                if(snakeHead['y'] == snakePositiontoCheck[j]['y']) and (snakeHead['x'] == snakePositiontoCheck[j]['x']):
+                    deadSnakes.append(snakeID)
+
+    return list(set(deadSnakes))
 
 class snake:
     def __init__(self, position = [{'x':0,'y':0}]):
@@ -143,7 +196,7 @@ class snake:
     def randomColour(self):
         self.colour = "%06x" % random.randint(0, 0xFFFFFF)
 
-# TODO: impplement a board class that takes care of food generation
+
 class board():
     def __int__(self):
         self.food = {'x':0,'y':0}
@@ -174,6 +227,7 @@ class game():
         self.gameID    = creatGameID()
         self.snakes    = {}
         self.snakeList = []
+        self.deadSnakes = []
         self.initSnakes()
         self.playersJoined = 1
         self.running = False
@@ -211,6 +265,12 @@ class game():
     def checkWalls(self):
         return checkWalls(self)
 
+    def checkHeadOnCollisions(self):
+        return checkHeadOnCollision(self)
+
+    def checkCollisions(self):
+        return checkCollision(self)
+
     def checkFood(self):
         checkFood(self)
 
@@ -219,4 +279,13 @@ class game():
 
     def generateFood(self):
         self.board.generateFood(self.snakes)
+
+    def addDeadSnake(self, snake):
+        self.deadSnakes = self.deadSnakes + snake
+
+    def getDeadSnakes(self):
+        return self.deadSnakes
+
+    def getAllSnakes(self):
+        return self.snakeList
 
