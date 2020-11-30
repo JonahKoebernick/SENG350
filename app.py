@@ -12,48 +12,25 @@ app = Flask(__name__)
 socketio = SocketIO(app)
 
 # Dictonary that contains all the games currently in progress
-currgames = {}
+gameManager = game_logic.gameManager()
+
 
 
 def sensor():
-    for gameID in currgames:
+    global  gameManager
+    currgames = gameManager.getCurrGames()
+    keylist = list(currgames)
+    for gameID in keylist:
         game = currgames[gameID]
         if(game.getRunning() == True):
-            deadSnakes = []
-            deadSnakes.extend(game.checkWalls())
-            game.checkFood()
-            deadSnakes.extend(game.checkHeadOnCollisions())
-            deadSnakes.extend(game.checkCollisions())
-            print(deadSnakes, file=sys.stderr)
-            if len(deadSnakes) > 0:
-                game.addDeadSnake(deadSnakes)
-                curr_dead = game.getDeadSnakes()
-                if(len(curr_dead) >= (constants.PLAYERS-1)):
-                    allsnakes = game.getAllSnakes()
-                    winner = list(set(allsnakes)- set(curr_dead))
-                    winnerstring = ''
-                    if(len(winner) > 0):
-                        winnerstring = winner[0]
-                    else:
-                        winnerstring = 'tie'
-                    return_winner = {'winner': winnerstring}
-                    socketio.emit('gameOver',return_winner, room=gameID)
-                    currgames.pop(gameID)
-                    print("gameOver1",file=sys.stderr)
+            gameOver, return_winner, return_dict = gameManager.updateGame(game)
 
+            if(gameOver):
+                socketio.emit('gameOver', return_winner, room=gameID)
+                gameManager.destoryGame(gameID)
+            else:
+                socketio.emit('boardState', return_dict, room=gameID)
 
-            return_dict = {}
-            snakeList = []
-            snakes = game.getSnakes()
-            for snakeID in snakes:
-                snake = snakes[snakeID]
-                colour = '#'+snake.getcolour()
-                snakePosition = snake.getPos()
-                snakeList.append({'snakeID': snakeID, 'snakePosition':snakePosition, 'snakeColour': colour})
-            food = game.getFood()
-            return_dict['snakes'] = snakeList
-            return_dict['food'] = food
-            socketio.emit('boardState',return_dict, room=gameID)
 
 # The Scheduler that times the games, alerting this value sets the moves per Second
 sched = BackgroundScheduler(daemon=True)
@@ -67,7 +44,7 @@ def hostGame():
     game      = game_logic.game()
     gameID    = game.getID()
     snakeID   = game.getStartSnakeID(0)
-    currgames[gameID] = game
+    gameManager.addGame(game, gameID)
 
     # Bind the User to the Specific
     # This is part of the subscribes publisher pattern.
@@ -90,8 +67,8 @@ def move(data):
     snakeID = data['snakeID']
 
     # Get the dictonary of snakes and set the move
-    snakes = currgames[gameID].getSnakes()
-    snakes[snakeID].setMove(move)
+    gameManager.move(gameID, snakeID, move)
+
 
 
 @socketio.on('startGame')
@@ -100,18 +77,16 @@ def startGame(data):
     gameID = data['gameID']
 
     # Start the game
-    currgames[gameID].setRunning(True)
+    gameManager.startGame(gameID)
 
 @socketio.on('joinGame')
 def joinGame(data):
     # Extract Data
     gameID    = data['gameID']
-    game      = currgames[gameID]
+
 
     # Add player to game instance
-    playerNum = game.getPlayersJoined()
-    snakeID   = game.getStartSnakeID(playerNum)
-    currgames[gameID].addPlayer()
+    playerNum, snakeID = gameManager.addPlayer(gameID)
     join_room(gameID)
 
     # Send GameID and the SnakeID of the user
