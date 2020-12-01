@@ -1,18 +1,17 @@
 from flask import  Flask,send_from_directory, jsonify, make_response, request ,redirect, abort, render_template, g, send_file
 from flask_socketio import SocketIO, emit, join_room, leave_room
-from random import randrange
 from apscheduler.schedulers.background import BackgroundScheduler
 import game_logic
 import constants
-import time
-import sys
+import game_manager
+
 
 # Boiler plate
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-# Dictonary that contains all the games currently in progress
-gameManager = game_logic.gameManager()
+# The gameManager, this follows the singleton pattern
+gameManager = game_manager.gameManager()
 
 
 
@@ -29,10 +28,10 @@ def sensor():
                 socketio.emit('gameOver', return_winner, room=gameID)
                 gameManager.destoryGame(gameID)
             else:
-                socketio.emit('boardState', return_dict, room=gameID)
+                socketio.emit('gameUpdate', return_dict, room=gameID)
 
 
-# The Scheduler that times the games, alerting this value sets the moves per Second
+# The Scheduler that times the games, altering this value sets the moves per Second
 sched = BackgroundScheduler(daemon=True)
 sched.add_job(sensor,'interval',seconds=2)
 sched.start()

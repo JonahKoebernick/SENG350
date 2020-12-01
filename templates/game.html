@@ -10458,7 +10458,7 @@ function updateboard(gameState){
             x = snakes[i]['snakePosition'][j]['x'];
             y = snakes[i]['snakePosition'][j]['y'];
             let string1 = '';
-            if(y > 1) {
+            if(y >= 1) {
                 string1 = board.concat(y.toString(10));
             }else{
                 string1 = board;
@@ -10472,7 +10472,7 @@ var gameID  = '';
 var snakeID = '';
 var host    = 1;
 var winner  = '';
-var socket = io.connect('https://' + document.domain + ':' + location.port);
+var socket = io.connect('http://' + document.domain + ':' + location.port);
 
 socket.on( 'connect', function(data) {
     let board = "board";
@@ -10495,8 +10495,7 @@ socket.on( 'gameInfo', function(data) {
     }
  });
 
-socket.on( 'boardState', function(data) {
-    console.dir(data);
+socket.on( 'gameUpdate', function(data) {
     updateboard(data);
  });
 
