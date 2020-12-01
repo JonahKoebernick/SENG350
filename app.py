@@ -33,7 +33,7 @@ def sensor():
 
 # The Scheduler that times the games, altering this value sets the moves per Second
 sched = BackgroundScheduler(daemon=True)
-sched.add_job(sensor,'interval',seconds=2)
+sched.add_job(sensor,'interval',seconds=constants.INTERVAL)
 sched.start()
 
 
