@@ -45,7 +45,7 @@ def checkWalls(game):
         snakeHead     = snakePosition[0]
 
         if(move == 'R'):
-            if(snakeHead['x'] + 1) > 9:
+            if(snakeHead['x'] + 1) > (constants.WIDTH - 1):
                 snakeOutofBounds.append(snakeID)
             y = snakeHead['y']
             x = snakeHead['x'] + 1
@@ -61,7 +61,7 @@ def checkWalls(game):
 
 
         if(move == 'D'):
-            if(snakeHead['y'] + 1) > 9:
+            if(snakeHead['y'] + 1) > (constants.HEIGHT - 1):
                 snakeOutofBounds.append(snakeID)
             y = snakeHead['y'] + 1
             x = snakeHead['x']

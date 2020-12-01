@@ -25,6 +25,7 @@ class gameManager():
         snakeID = game.getStartSnakeID(playerNum)
         game.addPlayer()
         return playerNum,snakeID
+
     def getCurrGames(self):
         return self.currgames
 
